@@ -95,3 +95,43 @@ foreach (var o in num4)
 }
 
 Console.WriteLine($"Общая выручка: {total}");
+
+Console.WriteLine("=== Шаг 5 ===");
+
+var customer = db.Customers.First(c => c.Name == "Иван Петров");   // найти
+customer.Phone = "+7 900 999-00-00";                                  // изменить
+db.SaveChanges();   // EF сам видит, что изменилось, и отправляет UPDATE
+
+var num5 = db.Products.ToList();   
+foreach (var p in num5) { p.Price *= 1.1m; }                     
+db.SaveChanges();
+
+var num6 = db.Products.First(p => p.Name == "ширпотреб");
+num6.CountInStock = 0;
+db.SaveChanges();
+
+void CreateOrder (ShopContext db, string costumer_name, string product_name, int quantity)
+{
+    var costumer = db.Customers.First(c => c.Name == costumer_name);
+    var product = db.Products.First(c => c.Name == product_name);
+    if (product.CountInStock >= quantity)
+    {
+        var order = new Order
+        {
+            Customer = costumer,
+            Product = product,
+            Quantity = quantity
+        };
+        db.Orders.Add(order);
+        product.CountInStock -= quantity;
+        db.SaveChanges();
+        Console.WriteLine("заказ успешно оформлен");
+    }
+    else
+    {
+        Console.WriteLine("недостаточно на складе");
+    }
+}
+
+CreateOrder(db, "Иван Петров", "красные спички", 10);
+CreateOrder(db, "Ольга Смирнова", "ширпотреб", 5);
