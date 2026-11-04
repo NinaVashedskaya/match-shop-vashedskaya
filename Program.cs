@@ -47,3 +47,51 @@ db.Orders.Add(number4);
 db.Orders.Add(number5);
 
 db.SaveChanges();   // только здесь данные уходят в базу
+
+Console.WriteLine("=== Шаг 4 ===");
+
+var omsk = db.Customers
+    .Where(c => c.City == "Омск")   // только из Омска
+    .OrderBy(c => c.Name)            // по алфавиту
+    .ToList();                       // здесь запрос уходит в базу
+
+foreach (var c in omsk)
+    Console.WriteLine($"{c.Name}, {c.Phone}");
+
+var num1 = db.Products
+    .Where(p => p.Price < 100)   
+    .OrderBy(p => p.Price)            
+    .ToList();                       
+    
+foreach (var p in num1)
+    Console.WriteLine($"{p.Name}, {p.Price}");
+
+var num2 = db.Products
+    .Count(p => p.CountInStock > 0);   
+
+Console.WriteLine($"видов спичек на складе : {num2}");
+
+var num3 = db.Products
+    .OrderByDescending (p => p.Price) 
+    .Take(3)           
+    .ToList();                       
+
+foreach (var p in num3)
+    Console.WriteLine($"{p.Name}, {p.Price}");
+
+var num4 = db.Orders
+    .Include(o => o.Customer)
+    .Include(o => o.Product)
+    .ToList();
+
+decimal total = 0;
+
+foreach (var o in num4)
+{
+    decimal sum = o.Product.Price * o.Quantity;
+    Console.WriteLine(
+        $"{o.Customer.Name} - {o.Product.Name} - {o.Quantity} шт. - {sum}");
+    total += sum;
+}
+
+Console.WriteLine($"Общая выручка: {total}");
