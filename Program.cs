@@ -135,3 +135,26 @@ void CreateOrder (ShopContext db, string costumer_name, string product_name, int
 
 CreateOrder(db, "Иван Петров", "красные спички", 10);
 CreateOrder(db, "Ольга Смирнова", "ширпотреб", 5);
+
+// тк при несвоевременном сохранении функция может не сработать из-за неверного остатка
+
+Console.WriteLine("=== Шаг 6 ===");
+
+var leaving = db.Customers.First(c => c.Name == "Ольга Смирнова");   // найти
+db.Customers.Remove(leaving);                                         // пометить на удаление
+db.SaveChanges();                                                     // отправить DELETE
+
+var num7 = db.Products
+    .Where(p => p.CountInStock == 0)  
+    .ToList();
+db.Products.RemoveRange(num7);                                         
+db.SaveChanges();                                                     
+
+var num8 = db.Products.Count();   
+Console.WriteLine($"осталось видов спичек на складе : {num8}");
+
+var num9 = db.Customers.First(c => c.Name == "Иван Петров");  
+db.Customers.Remove(num9);                                         
+db.SaveChanges();                                                     
+
+// заказ удалился, для реального магазина это плохо, тк могут появиться проблемы с бух / налоговым учетом ; нельзя посмотреть историю покупок и нормальную статистику продаж
